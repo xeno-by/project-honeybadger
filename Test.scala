@@ -1,4 +1,6 @@
-import scala.meta._
+import scala.meta.{Term => _, Template => _, _}
+import scala.meta.internal.ast._
+import scala.meta.dialects.Scala211
 
 object Test {
   def main(args: Array[String]): Unit = {
@@ -10,6 +12,14 @@ object Test {
 
     implicit val c = Scalahost.mkProjectContext(sourcepath, classpath)
     val List(echoScalaActors) = c.project.sources
-    println(echoScalaActors)
+    // println(echoScalaActors)
+
+    val withReceive = echoScalaActors.transform {
+      case cls @ Defn.Class(_, _, _, _, templ @ Template(_, List(actor), _, Some(stats)))
+      if actor.tpe == t"scala.actors.Actor" =>
+        val templ1 = templ
+        cls.copy(templ = templ1)
+    }
+    println(withReceive)
   }
 }
