@@ -7,5 +7,9 @@ object Test {
     val echoClasses = "/Users/xeno_by/Projects/echo/sandbox"
     val classpath = s"$scalaLibrary:$scalaActors:$echoClasses"
     val sourcepath = "/Users/xeno_by/Projects/echo"
+
+    implicit val c = Scalahost.mkProjectContext(sourcepath, classpath)
+    val List(echoScalaActors) = c.project.sources
+    println(echoScalaActors)
   }
 }
