@@ -28,6 +28,11 @@ object Test {
         }.asInstanceOf[Template]
         cls.copy(templ = templ1)
     }
-    println(withReceive)
+    val withImports = withReceive.transform {
+      case imp @ Import(List(clause @ Import.Clause(ref, List(Import.Selector.Wildcard()))))
+      if ref == q"scala.actors" =>
+        imp.copy(clauses = List(clause.copy(ref = q"akka.actors")))
+    }
+    println(withImports)
   }
 }
