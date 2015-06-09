@@ -17,7 +17,15 @@ object Test {
     val withReceive = echoScalaActors.transform {
       case cls @ Defn.Class(_, _, _, _, templ @ Template(_, List(actor), _, Some(stats)))
       if actor.tpe == t"scala.actors.Actor" =>
-        val templ1 = templ
+        val templ1 = templ.transform {
+          case act: Defn.Def if act.name.toString == "act" =>
+            val List(messages) = act.collect {
+              case Term.Apply(receive: Term.Ref, List(messages: Term.PartialFunction))
+              if receive.source == t"scala.actors.Actor".defs("receive").source =>
+                messages
+            }
+            act.copy(name = q"receive", body = messages)
+        }.asInstanceOf[Template]
         cls.copy(templ = templ1)
     }
     println(withReceive)
